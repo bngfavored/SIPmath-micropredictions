@@ -20,8 +20,11 @@ import copy as cp
 import altair as alt
 import base64
 from microprediction import MicroReader
+from bokeh.models.widgets import Button
+from bokeh.models import CustomJS
+from streamlit_bokeh_events import streamlit_bokeh_events
 warnings.filterwarnings('ignore')
-st.set_page_config(page_title="SIPmath™ 3.0 Library Generator", page_icon=None,
+st.set_page_config(page_title="microprediction: One Hour Ahead Stochastic Wind-Speed Predictions", page_icon=None,
                    layout="wide", initial_sidebar_state="auto", menu_items=None)
 
 
@@ -63,7 +66,17 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
+st.markdown(
+            f'''
+            <style>
+                .reportview-container .sidebar-content {{
+                    padding-top: {1}rem;
+                }}
+                .reportview-container .main .block-container {{
+                    padding-top: {1}rem;
+                }}
+            </style>
+            ''',unsafe_allow_html=True)
 
 # path = os.path.dirname(__file__)
 path = "."
@@ -104,16 +117,16 @@ path = "."
 
 # if check_password():
 
-PM_logo = get_img_with_href(
-    path+'/images/PM_logo.png', 'https://www.probabilitymanagement.org/')
-Metalog_Distribution = get_img_with_href(
-    path+'/images/Metalog Distribution.png', 'https://www.probabilitymanagement.org/metalog')
-HDR_Generator = get_img_with_href(
-    path+'/images/HDR Generator.png', 'https://www.probabilitymanagement.org/hdr')
-SIPmath_Standard = get_img_with_href(
-    path+'/images/SIPmath Standard.png', 'https://www.probabilitymanagement.org/sipmath')
+# PM_logo = get_img_with_href(
+#     path+'/images/PM_logo.png', 'https://www.probabilitymanagement.org/')
+# Metalog_Distribution = get_img_with_href(
+#     path+'/images/Metalog Distribution.png', 'https://www.probabilitymanagement.org/metalog')
+# HDR_Generator = get_img_with_href(
+#     path+'/images/HDR Generator.png', 'https://www.probabilitymanagement.org/hdr')
+# SIPmath_Standard = get_img_with_href(
+#     path+'/images/SIPmath Standard.png', 'https://www.probabilitymanagement.org/sipmath')
 Mircopredictions_img = get_img_with_href(
-    path+'/images/micropredictions.png', 'https://github.com/microprediction/microprediction')
+    path+'/images/micropredictions.png', 'https://micropredictions.com')
 # image = Image.open('PM_logo_transparent.png')
 images_container = st.container()
 images_cols = images_container.columns([5, 9])
@@ -132,10 +145,10 @@ images_cols[1].markdown('''
 images_cols[0].markdown(Mircopredictions_img, unsafe_allow_html=True)
 # images_container
 # images_container.image(image, unsafe_allow_html=True)
-main_container = st.empty()
-empty_table = st.empty()
-table_container = empty_table.container()
-slider_container = st.empty().container()
+# main_container = st.empty()
+# empty_table = st.empty()
+# table_container = empty_table.container()
+# slider_container = st.empty().container()
 # graphs_container = 
 graphs_container, text_container = st.container().columns([5, 9])
 graphs_container_main = st.empty().container()
@@ -616,7 +629,7 @@ def convert_to_JSON(input_df,
                )
 
     with open(filename) as f:
-        text_container.download_button(
+        graphs_container.download_button(
             label=f"Download {filename}",
             data=f,
             file_name=filename
@@ -1731,7 +1744,7 @@ def input_data(name, i, df, probs=None):
 #     input_data("Unknown", 0, pd_data, pd_data.index.to_list())
 # elif data_type == 'API':
 micro_data = get_micropredictions()
-micro_data_df = pd.DataFrame([ p for p in micro_data if p > 0.01 ], columns=['micropredictions'])
+micro_data_df = pd.DataFrame([ p for p in micro_data if p > 0.01 ], columns=['wind speed'])
 name = micro_data_df.columns[0]
 # table_container.subheader(f"Preview for {name}")
 # table_container.write(micro_data_df[:10].to_html(
@@ -1757,10 +1770,6 @@ text_container.markdown('''
 text_container.markdown('''
     <p class="big-font"></p>''', unsafe_allow_html=True)
 text_container.markdown('''
-    <p class="big-font"></p>''', unsafe_allow_html=True)
-text_container.markdown('''
-    <p class="big-font"></p>''', unsafe_allow_html=True)
-text_container.markdown('''
 <p class="big-font">Microprediction’s algorithms deliver forecasts as stochastic (SIP) libraries in the open SIPmath™ 3.0 Standard, so they may be used in Monte Carlo or other calculations in R, Python or Excel using ChanceCalc™.</p>
 ''', unsafe_allow_html=True)
 text_container.markdown('''
@@ -1775,7 +1784,21 @@ convert_to_JSON(micro_data_df,
                 bounds,
                 user_terms,
                 probs)
-if text_container.button(f'Display {file_name}'):
-    text_container.text("Mouse over the text then click on the clipboard icon to copy to your clipboard.")
-    with open(file_name, 'rb') as f:
-        text_container.json(json.load(f))
+     
+copy_button = Button(label=f"Copy {file_name} to clipboard.")
+with open(file_name, 'rb') as f:
+    copy_button.js_on_event("button_click", CustomJS(args=dict(data=str(json.load(f))), code="""
+        navigator.clipboard.writeText(data);
+        """))
+
+no_event = streamlit_bokeh_events( 
+    copy_button,
+    events="GET_TEXT",
+    key="get_text",
+    refresh_on_update=True,
+    override_height=75,
+    debounce_time=0)
+# if text_container.button(f'Display {file_name}'):
+#     text_container.text("Mouse over the text then click on the clipboard icon to copy to your clipboard.")
+#     
+#         text_container.json(json.load(f))
