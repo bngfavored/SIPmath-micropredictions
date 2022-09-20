@@ -1743,8 +1743,9 @@ def input_data(name, i, df, probs=None):
 #         # pass
 #     input_data("Unknown", 0, pd_data, pd_data.index.to_list())
 # elif data_type == 'API':
+col_name = 'wind_speed'
 micro_data = get_micropredictions()
-micro_data_df = pd.DataFrame([ p for p in micro_data if p > 0.01 ], columns=['wind speed'])
+micro_data_df = pd.DataFrame([ p for p in micro_data if p > 0.01 ], columns=[col_name])
 name = micro_data_df.columns[0]
 # table_container.subheader(f"Preview for {name}")
 # table_container.write(micro_data_df[:10].to_html(
