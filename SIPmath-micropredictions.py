@@ -1765,16 +1765,15 @@ micro_data_df.apply(make_csv_graph,
                 big_plots=big_plots,
                 user_terms=user_terms,
                 graphs=graphs)
-graphs_container.button('Update Data')
 text_container.markdown('''
     <p class="big-font"></p>''', unsafe_allow_html=True)
 text_container.markdown('''
     <p class="big-font"></p>''', unsafe_allow_html=True)
 text_container.markdown('''
-<p class="big-font">Microprediction’s algorithms deliver forecasts as stochastic (SIP) libraries in the open SIPmath™ 3.0 Standard, so they may be used in Monte Carlo or other calculations in R, Python or Excel using ChanceCalc™.</p>
+<p class="big-font">Microprediction’s algorithms deliver forecasts as stochastic (SIP) libraries in the open <a href="https://www.probabilitymanagement.org/30-standard">SIPmath™ 3.0 Standard</a>, so they may be used in Monte Carlo or other calculations in R, Python or Excel using <a href="https://www.probabilitymanagement.org/chancecalc">ChanceCalc™</a>.</p>
 ''', unsafe_allow_html=True)
 text_container.markdown('''
-<p class="big-font">For background on stochastic information packets (SIPs) see the Wikipedia entry on probability management. The microprediction site can be viewed as a source of real-time SIPs.</p>
+<p class="big-font">For background on stochastic information packets (SIPs) see the <a href="https://en.wikipedia.org/wiki/Probability_management">Wikipedia entry on probability management</a>. The <a href="https://micropredictions.com">microprediction site</a> can be viewed as a source of real-time SIPs.</p>
 ''', unsafe_allow_html=True)
 
 convert_to_JSON(micro_data_df,
