@@ -106,3 +106,4 @@ webencodings==0.5.1
 widgetsnbextension==3.5.2
 XlsxWriter==3.0.2
 yarg==0.1.9
+microprediction
