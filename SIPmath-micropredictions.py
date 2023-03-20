@@ -1734,7 +1734,7 @@ def input_data(name, i, df, probs=None):
 # elif data_type == 'API':
 col_name = 'wind_speed'
 micro_data = get_micropredictions()
-micro_data_df = pd.DataFrame([ p if p > 0.01 else 0 for p in micro_data ], columns=[col_name])
+micro_data_df = pd.DataFrame([ p for p in micro_data], columns=[col_name])
 name = micro_data_df.columns[0]
 # table_container.subheader(f"Preview for {name}")
 # table_container.write(micro_data_df[:10].to_html(
