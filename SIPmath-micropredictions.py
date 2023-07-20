@@ -23,49 +23,65 @@ from microprediction import MicroReader
 from bokeh.models.widgets import Button
 from bokeh.models import CustomJS
 from streamlit_bokeh_events import streamlit_bokeh_events
-warnings.filterwarnings('ignore')
-st.set_page_config(page_title="microprediction: One Hour Ahead Stochastic Wind-Speed Predictions", page_icon=None,
-                   layout="wide", initial_sidebar_state="auto", menu_items=None)
+
+warnings.filterwarnings("ignore")
+st.set_page_config(
+    page_title="microprediction: One Hour Ahead Stochastic Wind-Speed Predictions",
+    page_icon=None,
+    layout="wide",
+    initial_sidebar_state="auto",
+    menu_items=None,
+)
 
 
 @st.cache(allow_output_mutation=True)
 def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
+    with open(bin_file, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode()
 
 
 @st.cache(allow_output_mutation=True)
 def get_img_with_href(local_img_path, target_url):
-    img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
+    img_format = os.path.splitext(local_img_path)[-1].replace(".", "")
     bin_str = get_base64_of_bin_file(local_img_path)
-    html_code = f'''
+    html_code = f"""
         <a href="{target_url}">
             <img src="data:image/{img_format};base64,{bin_str}" height="90"; />
-        </a>'''
+        </a>"""
     return html_code
 
-st.markdown("""
+
+st.markdown(
+    """
 <style>
 .big-font {
     font-size:30px !important;
 }
 </style>
-""", unsafe_allow_html=True)
-st.markdown("""
+""",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
 <style>
 .sub-font {
     font-size:25px !important;
 }
 </style>
-""", unsafe_allow_html=True)
-st.markdown("""
+""",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
 <style>
 .header-font {
     font-size:50px !important;
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # path = os.path.dirname(__file__)
 path = "."
@@ -115,7 +131,8 @@ path = "."
 # SIPmath_Standard = get_img_with_href(
 #     path+'/images/SIPmath Standard.png', 'https://www.probabilitymanagement.org/sipmath')
 Mircopredictions_img = get_img_with_href(
-    path+'/images/micropredictions.png', 'https://micropredictions.com')
+    path + "/images/micropredictions.png", "https://micropredictions.com"
+)
 # image = Image.open('PM_logo_transparent.png')
 images_container = st.container()
 images_cols = images_container.columns([5, 9])
@@ -128,8 +145,11 @@ images_cols = images_container.columns([5, 9])
 # images_cols[0].markdown(PM_logo, unsafe_allow_html=True)
 # images_cols[4].markdown(Metalog_Distribution, unsafe_allow_html=True)
 images_cols[1].header("One Hour Ahead Stochastic Wind-Speed Predictions")
-images_cols[1].markdown('''
-    <p class="sub-font">If you can measure it, consider it predicted in real time.</p>''', unsafe_allow_html=True)
+images_cols[1].markdown(
+    """
+    <p class="sub-font">If you can measure it, consider it predicted in real time.</p>""",
+    unsafe_allow_html=True,
+)
 # images_cols[3].markdown(HDR_Generator, unsafe_allow_html=True)
 images_cols[0].markdown(Mircopredictions_img, unsafe_allow_html=True)
 # images_container
@@ -138,7 +158,7 @@ images_cols[0].markdown(Mircopredictions_img, unsafe_allow_html=True)
 # empty_table = st.empty()
 # table_container = empty_table.container()
 # slider_container = st.empty().container()
-# graphs_container = 
+# graphs_container =
 graphs_container, text_container = st.container().columns([5, 9])
 graphs_container_main = st.empty().container()
 # Taken from the metalog
@@ -170,39 +190,49 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
     # if res_data
     # Collecting data to set limits of axes
     print(f"running plot for {name} in {key}")
-    if 'res_data' not in st.session_state['mfitted'][key][name]:
+    if "res_data" not in st.session_state["mfitted"][key][name]:
         # st.write("notthere")
-        res_data = pd.DataFrame({'term': np.repeat(str(m['params']['term_lower_bound'])
-                                                   + ' Terms', len(m['M'].iloc[:, 0])),
-                                 'pdfValues': m['M'].iloc[:, 0],
-                                 'quantileValues': m['M'].iloc[:, 1],
-                                 'cumValue': m['M']['y']
-                                 })
-        if m['M'].shape[-1] > 3:
-            for i in range(2, len(m['M'].iloc[0, ] - 1) // 2 + 1):
-                if m['Validation']['valid'][i] == 'yes':
+        res_data = pd.DataFrame(
+            {
+                "term": np.repeat(
+                    str(m["params"]["term_lower_bound"]) + " Terms",
+                    len(m["M"].iloc[:, 0]),
+                ),
+                "pdfValues": m["M"].iloc[:, 0],
+                "quantileValues": m["M"].iloc[:, 1],
+                "cumValue": m["M"]["y"],
+            }
+        )
+        if m["M"].shape[-1] > 3:
+            for i in range(2, len(m["M"].iloc[0,] - 1) // 2 + 1):
+                if m["Validation"]["valid"][i] == "yes":
                     # st.write(i)
-                    temp_data = pd.DataFrame({'term': np.repeat(str(m['params']['term_lower_bound'] + i - 1)
-                                                                + ' Terms', len(m['M'].iloc[:, 0])),
-                                              'pdfValues': m['M'].iloc[:, i * 2 - 2],
-                                              'quantileValues': m['M'].iloc[:, i * 2 - 1],
-                                              'cumValue': m['M']['y']})
-                    res_data = pd.concat(
-                        [res_data, temp_data], ignore_index=True)
-        res_data['frames'] = res_data['term']
-        res_data['groups'] = res_data['term']
-        st.session_state['mfitted'][key][name]['res_data'] = res_data
+                    temp_data = pd.DataFrame(
+                        {
+                            "term": np.repeat(
+                                str(m["params"]["term_lower_bound"] + i - 1) + " Terms",
+                                len(m["M"].iloc[:, 0]),
+                            ),
+                            "pdfValues": m["M"].iloc[:, i * 2 - 2],
+                            "quantileValues": m["M"].iloc[:, i * 2 - 1],
+                            "cumValue": m["M"]["y"],
+                        }
+                    )
+                    res_data = pd.concat([res_data, temp_data], ignore_index=True)
+        res_data["frames"] = res_data["term"]
+        res_data["groups"] = res_data["term"]
+        st.session_state["mfitted"][key][name]["res_data"] = res_data
     else:
-        res_data = st.session_state['mfitted'][key][name]['res_data']
+        res_data = st.session_state["mfitted"][key][name]["res_data"]
     # st.write(res_data)
     # st.write(m['Validation']['valid'])
     # if (res_data['term'] != f"{term} Terms").all():
-      # for new in range(int(term),1,-1):
-        # # st.write(new)
-        # if (res_data['term'] == f"{new} Terms").any():
-        # term = new
-        # # st.write(new)
-        # break
+    # for new in range(int(term),1,-1):
+    # # st.write(new)
+    # if (res_data['term'] == f"{new} Terms").any():
+    # term = new
+    # # st.write(new)
+    # break
     # highest_term = f"{term} Terms"
     # # print(term)
     # # st.write(highest_term)
@@ -211,142 +241,142 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
     # highest_term_index = highest_term_df.index[-1] + 1
     # # highest_term_df['frames']
     # fig = px.line(res_data[:highest_term_index], y="pdfValues", x="quantileValues", color = "term",
-        # animation_group='groups',
-        # animation_frame = 'frames',
-        # range_x=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
-        # range_y =[0, max(res_data[:highest_term_index]["pdfValues"])])
+    # animation_group='groups',
+    # animation_frame = 'frames',
+    # range_x=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
+    # range_y =[0, max(res_data[:highest_term_index]["pdfValues"])])
     # fig1 = px.line(res_data[:highest_term_index], y="cumValue", x="quantileValues", color = "term",
-        # animation_group='term',
-        # animation_frame = 'term')
+    # animation_group='term',
+    # animation_frame = 'term')
     # # st.write(res_data)# hide and lock down axes
     # # fig.update_xaxes(visible=False, fixedrange=True)
     # # fig.update_yaxes(visible=False, fixedrange=True)
     # # fig.for_each_trace(
-        # # lambda trace: trace.update(visible = "legendonly") if trace.name != highest_term  else (),
-        # # )
+    # # lambda trace: trace.update(visible = "legendonly") if trace.name != highest_term  else (),
+    # # )
     # # fig1.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 750
     # fig.update_layout(
-        # showlegend=False,
-        # yaxis_title='PDF',
-        # xaxis_title='Quantile',
-        # paper_bgcolor='rgba(0,0,0,0)',
-        # plot_bgcolor='rgba(0,0,0,0)',
-        # xaxis=dict(
-        # showline=True,
-        # showgrid=False,
-        # showticklabels=True,
-        # linecolor='rgb(204, 204, 204)',
-        # linewidth=2,
-        # ticks='outside',
-        # tickfont=dict(
-        # family='Arial',
-        # size=12,
-        # color='rgb(82, 82, 82)',
-        # ),
-        # ),
-        # yaxis=dict(
-        # showgrid=False,
-        # zeroline=False,
-        # showline=False,
-        # showticklabels=False,
-        # ))
+    # showlegend=False,
+    # yaxis_title='PDF',
+    # xaxis_title='Quantile',
+    # paper_bgcolor='rgba(0,0,0,0)',
+    # plot_bgcolor='rgba(0,0,0,0)',
+    # xaxis=dict(
+    # showline=True,
+    # showgrid=False,
+    # showticklabels=True,
+    # linecolor='rgb(204, 204, 204)',
+    # linewidth=2,
+    # ticks='outside',
+    # tickfont=dict(
+    # family='Arial',
+    # size=12,
+    # color='rgb(82, 82, 82)',
+    # ),
+    # ),
+    # yaxis=dict(
+    # showgrid=False,
+    # zeroline=False,
+    # showline=False,
+    # showticklabels=False,
+    # ))
     # fig.add_trace(go.Scatter(y=highest_term_df.pdfValues, x=highest_term_df.quantileValues,name=highest_term))
     # fig1.add_trace(go.Scatter(mode='markers', y=m["dataValues"]['probs'], x=m["dataValues"]['x'],
-        # marker=dict(
-        # color='rgba(0,0,0,0)',
-        # size=15,
-        # line=dict(
-        # color='DarkRed',
-        # width=1
-        # )),name=name))
+    # marker=dict(
+    # color='rgba(0,0,0,0)',
+    # size=15,
+    # line=dict(
+    # color='DarkRed',
+    # width=1
+    # )),name=name))
     # fig1.add_trace(go.Scatter(y=highest_term_df.cumValue, x=highest_term_df.quantileValues,name=highest_term))
     # total_graph = make_subplots(rows=1, cols=2, subplot_titles = ('PDF', 'CDF'))
     # _ = [total_graph.append_trace(trace, row=1, col=1) for trace in fig['data']]
     # _ = [total_graph.append_trace(trace, row=1, col=2) for trace in fig1['data']]
     # total_graph.update_layout(
-        # showlegend=False,
-        # paper_bgcolor='rgba(0,0,0,0)',
-        # plot_bgcolor='rgba(0,0,0,0)',
-        # xaxis=dict(
-        # range=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
-        # showline=True,
-        # showgrid=False,
-        # showticklabels=True,
-        # linecolor='rgb(204, 204, 204)',
-        # linewidth=2,
-        # ticks='outside',
-        # tickfont=dict(
-        # family='Arial',
-        # size=12,
-        # color='rgb(82, 82, 82)',
-        # ),
-        # ),
-        # xaxis2=dict(
-        # range=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
-        # showline=True,
-        # showgrid=False,
-        # showticklabels=True,
-        # linecolor='rgb(204, 204, 204)',
-        # linewidth=2,
-        # ticks='outside',
-        # tickfont=dict(
-        # family='Arial',
-        # size=12,
-        # color='rgb(82, 82, 82)',
-        # ),
-        # ),
-        # yaxis=dict(
-        # showgrid=False,
-        # zeroline=False,
-        # showline=False,
-        # showticklabels=False,
-        # range = [0, max(res_data[:highest_term_index]["pdfValues"])]
-        # ),
-        # yaxis2=dict(
-        # showgrid=False,
-        # zeroline=False,
-        # showline=False,
-        # showticklabels=False,
-        # range = [0, max(res_data[:highest_term_index]["cumValue"])]
-        # ))
+    # showlegend=False,
+    # paper_bgcolor='rgba(0,0,0,0)',
+    # plot_bgcolor='rgba(0,0,0,0)',
+    # xaxis=dict(
+    # range=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
+    # showline=True,
+    # showgrid=False,
+    # showticklabels=True,
+    # linecolor='rgb(204, 204, 204)',
+    # linewidth=2,
+    # ticks='outside',
+    # tickfont=dict(
+    # family='Arial',
+    # size=12,
+    # color='rgb(82, 82, 82)',
+    # ),
+    # ),
+    # xaxis2=dict(
+    # range=[min(res_data[:highest_term_index]['quantileValues']), max(res_data[:highest_term_index]['quantileValues'])],
+    # showline=True,
+    # showgrid=False,
+    # showticklabels=True,
+    # linecolor='rgb(204, 204, 204)',
+    # linewidth=2,
+    # ticks='outside',
+    # tickfont=dict(
+    # family='Arial',
+    # size=12,
+    # color='rgb(82, 82, 82)',
+    # ),
+    # ),
+    # yaxis=dict(
+    # showgrid=False,
+    # zeroline=False,
+    # showline=False,
+    # showticklabels=False,
+    # range = [0, max(res_data[:highest_term_index]["pdfValues"])]
+    # ),
+    # yaxis2=dict(
+    # showgrid=False,
+    # zeroline=False,
+    # showline=False,
+    # showticklabels=False,
+    # range = [0, max(res_data[:highest_term_index]["cumValue"])]
+    # ))
     # # total_graph.update_yaxes(range=[0,1])
     # frames = [dict(
-        # name = k,
-        # data = [go.Scatter(y= res_data.loc[res_data['term'] == f"{k} Terms",'pdfValues'], x=res_data.loc[res_data['term'] == f"{k} Terms",'quantileValues']),#update the trace 0
-        # go.Scatter(y = res_data.loc[res_data['term'] == f"{k} Terms",'cumValue'], x=res_data.loc[res_data['term'] == f"{k} Terms",'quantileValues'])#update the trace 2
-        # ],
-        # traces=[0,2]# the elements of the list [0,1,2] give info on the traces in fig.data
-        # # that are updated by the above three go.Scatter instances
-        # ) for k in range(term+1) if (res_data['term'] == f"{k} Terms").any()]
+    # name = k,
+    # data = [go.Scatter(y= res_data.loc[res_data['term'] == f"{k} Terms",'pdfValues'], x=res_data.loc[res_data['term'] == f"{k} Terms",'quantileValues']),#update the trace 0
+    # go.Scatter(y = res_data.loc[res_data['term'] == f"{k} Terms",'cumValue'], x=res_data.loc[res_data['term'] == f"{k} Terms",'quantileValues'])#update the trace 2
+    # ],
+    # traces=[0,2]# the elements of the list [0,1,2] give info on the traces in fig.data
+    # # that are updated by the above three go.Scatter instances
+    # ) for k in range(term+1) if (res_data['term'] == f"{k} Terms").any()]
     # # st.write(total_graph.layout)
     # updatemenus = [dict(type='buttons',
-        # buttons=[dict(label='Play',
-        # method='animate',
-        # args=[[f'{k}' for k in range(term+1) if (res_data['term'] == f"{k} Terms").any()],
-        # dict(frame=dict(duration=750, redraw=False),
-        # transition=dict(duration=250),
-        # easing='linear',
-        # fromcurrent=True,
-        # mode='immediate'
-        # )])],
-        # direction= 'left',
-        # pad=dict(r= 10, t=85),
-        # showactive =True, x= 0.1, y= 0, xanchor= 'right', yanchor= 'top')
-        # ]
+    # buttons=[dict(label='Play',
+    # method='animate',
+    # args=[[f'{k}' for k in range(term+1) if (res_data['term'] == f"{k} Terms").any()],
+    # dict(frame=dict(duration=750, redraw=False),
+    # transition=dict(duration=250),
+    # easing='linear',
+    # fromcurrent=True,
+    # mode='immediate'
+    # )])],
+    # direction= 'left',
+    # pad=dict(r= 10, t=85),
+    # showactive =True, x= 0.1, y= 0, xanchor= 'right', yanchor= 'top')
+    # ]
 
     # sliders = [{'yanchor': 'top',
-        # 'xanchor': 'left',
-        # 'currentvalue': {'font': {'size': 30}, 'prefix': 'Term: ', 'visible': True, 'xanchor': 'center'},
-        # 'transition': {'duration': 500.0, 'easing': 'linear'},
-        # 'pad': {'b': 10, 't': 50},
-        # 'len': 0.9, 'x': 0.1, 'y': 0,
-        # 'steps': [{'args': [[k], {'frame': {'duration': 500.0, 'easing': 'linear', 'redraw': False},
-        # 'transition': {'duration': 100, 'easing': 'linear'}}],
-        # 'label': k, 'method': 'animate'} for k in range(term+1)  if (res_data['term'] == f"{k} Terms").any()
-        # ]}]
+    # 'xanchor': 'left',
+    # 'currentvalue': {'font': {'size': 30}, 'prefix': 'Term: ', 'visible': True, 'xanchor': 'center'},
+    # 'transition': {'duration': 500.0, 'easing': 'linear'},
+    # 'pad': {'b': 10, 't': 50},
+    # 'len': 0.9, 'x': 0.1, 'y': 0,
+    # 'steps': [{'args': [[k], {'frame': {'duration': 500.0, 'easing': 'linear', 'redraw': False},
+    # 'transition': {'duration': 100, 'easing': 'linear'}}],
+    # 'label': k, 'method': 'animate'} for k in range(term+1)  if (res_data['term'] == f"{k} Terms").any()
+    # ]}]
     # total_graph.update(frames=frames)
     # total_graph.update_layout(updatemenus=updatemenus,
-        # sliders=sliders)
+    # sliders=sliders)
     # selected_points = plotly_events(total_graph)
     # st.write(selected_points)
     # if st.button("get data"):
@@ -355,23 +385,28 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
 
     # Collecting data into dictionary
     InitialResults = {}
-    InitialResults[str(m['params']['term_lower_bound']) + ' Terms'] = pd.DataFrame({
-        'pdfValues': m['M'].iloc[:, 0],
-        'quantileValues': m['M'].iloc[:, 1],
-        'cumValue': m['M']['y']
-    })
-    if m['M'].shape[-1] > 3:
-        for i in range(2, len(m['M'].iloc[0, ] - 1) // 2 + 1):
-            InitialResults[str(m['params']['term_lower_bound'] + i - 1) + ' Terms'] = pd.DataFrame({
-                'pdfValues': m['M'].iloc[:, i * 2 - 2],
-                'quantileValues': m['M'].iloc[:, i * 2 - 1],
-                'cumValue': m['M']['y']
-            })
+    InitialResults[str(m["params"]["term_lower_bound"]) + " Terms"] = pd.DataFrame(
+        {
+            "pdfValues": m["M"].iloc[:, 0],
+            "quantileValues": m["M"].iloc[:, 1],
+            "cumValue": m["M"]["y"],
+        }
+    )
+    if m["M"].shape[-1] > 3:
+        for i in range(2, len(m["M"].iloc[0,] - 1) // 2 + 1):
+            InitialResults[
+                str(m["params"]["term_lower_bound"] + i - 1) + " Terms"
+            ] = pd.DataFrame(
+                {
+                    "pdfValues": m["M"].iloc[:, i * 2 - 2],
+                    "quantileValues": m["M"].iloc[:, i * 2 - 1],
+                    "cumValue": m["M"]["y"],
+                }
+            )
 
     # ggplot style
-    plt.style.use('ggplot')
-    max_valid_term = m['Validation'][m['Validation']
-                                     ['valid'] == 'yes']['term'].max()
+    plt.style.use("ggplot")
+    max_valid_term = m["Validation"][m["Validation"]["valid"] == "yes"]["term"].max()
 
     # st.write(m['M'])
     # st.write(InitialResults)
@@ -444,7 +479,7 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
             for i in terms_for_loop:
                 # print(m['Validation']['valid'])
                 # print("i is",i)
-                if m['Validation']['valid'][i] == 'yes':
+                if m["Validation"]["valid"][i] == "yes":
                     j = 0
                     # Plotting PDF
                     # ax[j].plot(InitialResults[str(i) + ' Terms']['quantileValues'], InitialResults[str(i) + ' Terms']['pdfValues'],
@@ -453,15 +488,23 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
                     # ax[j].axes.yaxis.set_ticks([])
                     plt.rcParams["figure.figsize"] = [7.00, 3.50]
                     plt.rcParams["figure.autolayout"] = True
-                    im = plt.imread(path+'/images/SIPmath Standard Certified.png') # insert local path of the image.
-                    ax.plot(InitialResults[str(i) + ' Terms']['quantileValues'], InitialResults[str(i) + ' Terms']['pdfValues'],
-                               linewidth=2, c='darkblue')
-                    ax.patch.set_facecolor('white')
+                    im = plt.imread(
+                        path + "/images/SIPmath Standard Certified.png"
+                    )  # insert local path of the image.
+                    ax.plot(
+                        InitialResults[str(i) + " Terms"]["quantileValues"],
+                        InitialResults[str(i) + " Terms"]["pdfValues"],
+                        linewidth=2,
+                        c="darkblue",
+                    )
+                    ax.patch.set_facecolor("white")
                     ax.axes.yaxis.set_ticks([])
-                    ax.set(title='Wind Speed in 1 Hour')
-                    newax = fig.add_axes([0.5,0.5,0.5,0.5], anchor=(0.59, 0.15), zorder=1)
+                    ax.set(title="Wind Speed in 1 Hour")
+                    newax = fig.add_axes(
+                        [0.5, 0.5, 0.5, 0.5], anchor=(0.59, 0.15), zorder=1
+                    )
                     newax.imshow(im)
-                    newax.axis('off')
+                    newax.axis("off")
                     # Plot data
                     # ax[j + 1].scatter(m["dataValues"]['x'], m["dataValues"]
                     #                   ['probs'], c='white', edgecolor='black')
@@ -505,46 +548,56 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
             plt.tight_layout(rect=[0, 0, 0.75, 1])
             # graphs_container.subheader('Wind Speed in 1 Hour')
             graphs_container.pyplot(plt)
-            if st.session_state['mfitted'][key][name]['plot']['big plot'] is None:
+            if st.session_state["mfitted"][key][name]["plot"]["big plot"] is None:
                 temp_img = io.BytesIO()
-                plt.savefig(temp_img, format='png',
-                            transparent=True, unsafe_allow_html=True)
-                st.session_state['mfitted'][key][name]['plot']['big plot'] = temp_img
+                plt.savefig(
+                    temp_img, format="png", transparent=True, unsafe_allow_html=True
+                )
+                st.session_state["mfitted"][key][name]["plot"]["big plot"] = temp_img
                 # graphs_container.pyplot(st.session_state['mfitted'][key][name]['plot']['big plot'])
                 # img_from_bytes = Image.open(st.session_state['mfitted'][key][name]['plot']['big plot'])
                 # graphs_container.image(st.session_state['mfitted'][key][name]['plot']['big plot'])
             # img_from_bytes = Image.open(st.session_state['mfitted'][key][name]['plot']['big plot'])
             # graphs_container.image(st.session_state['mfitted'][key][name]['plot']['big plot'],use_column_width = True)
-                # graphs_container.pyplot(plt)
-                # return
-                # break
+            # graphs_container.pyplot(plt)
+            # return
+            # break
         # ax[0].legend()
         # plt.tight_layout(rect=[0,0,0.75,1])
         # graphs_container.pyplot(plt)
 
         # plt.clf()
-                # ax[i-2, j].patch.set(title=str(current_term) + ' Terms', ylabel='PDF', xlabel='Quantiles')
+        # ax[i-2, j].patch.set(title=str(current_term) + ' Terms', ylabel='PDF', xlabel='Quantiles')
 
-                # if current_term != 5*3:
-                # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF')
-                # else:
-                # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF', xlabel='Quantiles')fig, ax = plt.subplots(5, 3, figsize=(8, 3*3), sharex='col')
+        # if current_term != 5*3:
+        # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF')
+        # else:
+        # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF', xlabel='Quantiles')fig, ax = plt.subplots(5, 3, figsize=(8, 3*3), sharex='col')
 
         # i = 2
-            ################################################################
+        ################################################################
     if csv:
-        if st.session_state['mfitted'][key][name]['plot']['csv'] is None:
-            fig, ax = plt.subplots(3, 5, figsize=(10, 5), sharex='col')
+        if st.session_state["mfitted"][key][name]["plot"]["csv"] is None:
+            fig, ax = plt.subplots(3, 5, figsize=(10, 5), sharex="col")
             for i in range(2, 4 + 1):
                 for j in range(0, 5):
-                    current_term = (2 + (i - 2)*5 + j)
+                    current_term = 2 + (i - 2) * 5 + j
                     print(f"{current_term}")
                     # Check to make sure it is valid before plotting.
-                    if results_len + 2 > current_term and m['Validation']['valid'][current_term] == 'yes':
+                    if (
+                        results_len + 2 > current_term
+                        and m["Validation"]["valid"][current_term] == "yes"
+                    ):
                         print(f"plotting {current_term}")
                         # Plotting PDF
-                        ax[i-2, j].plot(InitialResults[str(current_term) + ' Terms']['quantileValues'], InitialResults[str(current_term) + ' Terms']['pdfValues'],
-                                        linewidth=2, c='darkblue')
+                        ax[i - 2, j].plot(
+                            InitialResults[str(current_term) + " Terms"][
+                                "quantileValues"
+                            ],
+                            InitialResults[str(current_term) + " Terms"]["pdfValues"],
+                            linewidth=2,
+                            c="darkblue",
+                        )
 
                         # Plotting CDF
                         # ax[i-2, j].plot(InitialResults[str(current_term) + ' Terms']['quantileValues'], InitialResults[str(current_term) + ' Terms']['cumValue'],
@@ -555,111 +608,128 @@ def plot(m, big_plots=None, csv=None, term=None, name=None, key=None):
                         # Plotting blank PDF chart
                         # ax[i-2, 0].plot()
                         # Plotting blank CDF chart
-                        ax[i-2, j].plot()
+                        ax[i - 2, j].plot()
                     # Axes setup
                     # if norm:
                     # ax[i-2, j].axis([min(res_data['quantileValues']), max(res_data['quantileValues']),
-                        # round(min(m["dataValues"]['probs']),1), round(max(m["dataValues"]['probs']),1)])
-                    ax[i-2, j].patch.set_facecolor('white')
-                    ax[i-2, j].axes.xaxis.set_ticks([])
-                    ax[i-2, j].axes.yaxis.set_ticks([])
+                    # round(min(m["dataValues"]['probs']),1), round(max(m["dataValues"]['probs']),1)])
+                    ax[i - 2, j].patch.set_facecolor("white")
+                    ax[i - 2, j].axes.xaxis.set_ticks([])
+                    ax[i - 2, j].axes.yaxis.set_ticks([])
                     if current_term < 11:
-                        ax[i-2, j].set(title=str(current_term) +
-                                       ' Terms', ylabel='PDF')
+                        ax[i - 2, j].set(
+                            title=str(current_term) + " Terms", ylabel="PDF"
+                        )
                         # ax[i-2, j].patch.set()
                     else:
-                        ax[i-2, j].set(title=str(current_term) +
-                                       ' Terms', ylabel='PDF', xlabel='Quantiles')
+                        ax[i - 2, j].set(
+                            title=str(current_term) + " Terms",
+                            ylabel="PDF",
+                            xlabel="Quantiles",
+                        )
 
                         # ax[i-2, j].patch.set(title=str(current_term) + ' Terms', ylabel='PDF', xlabel='Quantiles')
 
                     # if current_term != 5*3:
-                        # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF')
+                    # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF')
                     # else:
-                        # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF', xlabel='Quantiles')
+                    # ax[i-2, j].set(title=str(current_term) + ' Terms', ylabel='CDF', xlabel='Quantiles')
 
             plt.tight_layout(rect=[0, 0, 0.75, 1])
             temp_img = io.BytesIO()
-            plt.savefig(temp_img, format='png',
-                        transparent=True, unsafe_allow_html=True)
-            st.session_state['mfitted'][key][name]['plot']['csv'] = temp_img
+            plt.savefig(
+                temp_img, format="png", transparent=True, unsafe_allow_html=True
+            )
+            st.session_state["mfitted"][key][name]["plot"]["csv"] = temp_img
             # graphs_container.pyplot(st.session_state['mfitted'][key][name]['plot']['big plot'])
             # img_from_bytes = Image.open(st.session_state['mfitted'][key][name]['plot']['big plot'])
             # graphs_container.image(st.session_state['mfitted'][key][name]['plot']['big plot'])
             # img_from_bytes = Image.open(st.session_state['mfitted'][key][name]['plot']['big plot'])
             graphs_container_main.image(
-                st.session_state['mfitted'][key][name]['plot']['csv'], use_column_width=True)
+                st.session_state["mfitted"][key][name]["plot"]["csv"],
+                use_column_width=True,
+            )
             print("looped")
         else:
             graphs_container_main.image(
-                st.session_state['mfitted'][key][name]['plot']['csv'], use_column_width=True)
+                st.session_state["mfitted"][key][name]["plot"]["csv"],
+                use_column_width=True,
+            )
 
     # graphs_container.pyplot(plt)
     # return plt
 
 
-def convert_to_JSON(input_df,
-                    filename,
-                    author,
-                    dependence,
-                    boundedness,
-                    bounds,
-                    term_saved,
-                    probs):
-
-    PySIP.Json(input_df,
-               filename,
-               author,
-               dependence=dependence,
-               boundedness=boundedness,
-               bounds=bounds,
-               term_saved=term_saved,
-               probs=probs
-               )
+def convert_to_JSON(
+    input_df, filename, author, dependence, boundedness, bounds, term_saved, probs
+):
+    PySIP.Json(
+        input_df,
+        filename,
+        author,
+        dependence=dependence,
+        boundedness=boundedness,
+        bounds=bounds,
+        term_saved=term_saved,
+        probs=probs,
+    )
 
     with open(filename) as f:
         graphs_container.download_button(
-            label=f"Download {filename}",
-            data=f,
-            file_name=filename
+            label=f"Download {filename}", data=f, file_name=filename
         )
     return True
 
 
-def preprocess_charts(x,
-                      probs,
-                      boundedness,
-                      bounds,
-                      big_plots,
-                      terms,
-                      csv,
-                      name,
-                      user_term):
+def preprocess_charts(
+    x, probs, boundedness, bounds, big_plots, terms, csv, name, user_term
+):
     # Create metalog
     # st.write(boundedness,
     # bounds)
-    if 'mfitted' not in st.session_state:
-        st.session_state['mfitted'] = {'csv': {}, 'quantile': {}}
+    if "mfitted" not in st.session_state:
+        st.session_state["mfitted"] = {"csv": {}, "quantile": {}}
     if probs is np.nan:
-        key = 'csv'
+        key = "csv"
     else:
-        key = 'quantile'
+        key = "quantile"
     # update_boundedness(False)
-    if (name not in st.session_state['mfitted'][key] or st.session_state['mfitted'][key][name]['fit'] is None) or (name in st.session_state['mfitted'][key] and not user_term is None and st.session_state['mfitted'][key][name]['fit']['Validation']['term'].max() < user_term):
+    if (
+        name not in st.session_state["mfitted"][key]
+        or st.session_state["mfitted"][key][name]["fit"] is None
+    ) or (
+        name in st.session_state["mfitted"][key]
+        and not user_term is None
+        and st.session_state["mfitted"][key][name]["fit"]["Validation"]["term"].max()
+        < user_term
+    ):
         print(f"running metalog fit for {name} in {key}")
-        mfitted = metalog.fit(x, bounds=bounds, boundedness=boundedness,
-                              fit_method='OLS', term_limit=terms, probs=probs)
+        mfitted = metalog.fit(
+            x,
+            bounds=bounds,
+            boundedness=boundedness,
+            fit_method="OLS",
+            term_limit=terms,
+            probs=probs,
+        )
         # max_valid_term = int(mfitted['Validation'][(mfitted['Validation']['valid'] == 'yes') & (mfitted['Validation']['term'] <= user_term)]['term'].max())
-        st.session_state['mfitted'][key][name] = {'fit': mfitted, 'plot': {'csv': None, 'big plot': None}, 'options': {
-            'boundedness': boundedness, 'terms': user_term, 'bounds': bounds}}
+        st.session_state["mfitted"][key][name] = {
+            "fit": mfitted,
+            "plot": {"csv": None, "big plot": None},
+            "options": {
+                "boundedness": boundedness,
+                "terms": user_term,
+                "bounds": bounds,
+            },
+        }
     print("user term is", user_term)
     # Create graphs
-    # st.write(st.session_state['mfitted'][key][name]['fit'].keys())
-    # st.write(type(st.session_state['mfitted'][key][name]['fit']))
-    # st.write(st.session_state['mfitted'][key][name]['fit']['M'])
-    # st.write(st.session_state['mfitted'][key][name]['fit']['A'])
-    # st.write(st.session_state['mfitted'][key][name]['fit']["dataValues"])
-    # st.write(st.session_state['mfitted'][key][name]['fit']['Validation'])
+    # st.write(st.session_state["mfitted"][key][name]["fit"].keys())
+    # st.write(type(st.session_state["mfitted"][key][name]["fit"]))
+    # st.write(st.session_state["mfitted"][key][name]["fit"]["M"])
+    # st.write(st.session_state["mfitted"][key][name]["fit"]["A"])
+    # st.write(st.session_state["mfitted"][key][name]["fit"]["dataValues"])
+    # st.write(st.session_state["mfitted"][key][name]["fit"]["Validation"])
     # big_plots = st.sidebar.checkbox("Big Graphs?")
     # max_valid_term = int(st.session_state['mfitted'][key][name]['fit']['Validation'][st.session_state['mfitted'][key][name]['fit']['Validation']['valid'] == 'yes']['term'].max())
     # print(type(max_valid_term))
@@ -668,143 +738,219 @@ def preprocess_charts(x,
     # else:
     # term = int(16)
     # plot(mfitted, True,csv=None,term=None,name=name)
-    plot(st.session_state['mfitted'][key][name]['fit'],
-         big_plots, csv, user_term, name=name, key=key)
+    plot(
+        st.session_state["mfitted"][key][name]["fit"],
+        big_plots,
+        csv,
+        user_term,
+        name=name,
+        key=key,
+    )
+
 
 def get_micropredictions():
-    HAMOOSE_CHEETAH = '612a4363e8ba2100de3d12e077d0b13e'
-    NAME = 'noaa_wind_speed_46073.json'
+    HAMOOSE_CHEETAH = "612a4363e8ba2100de3d12e077d0b13e"
+    NAME = "noaa_wind_speed_46073.json"
     mr = MicroReader()
-    predictions = mr.get_predictions(name=NAME,write_key=HAMOOSE_CHEETAH,delay=mr.DELAYS[-1])
+    predictions = mr.get_predictions(
+        name=NAME, write_key=HAMOOSE_CHEETAH, delay=mr.DELAYS[-1]
+    )
     print(predictions)
     return predictions
 
+
 def sent_to_pastebin(filename, file):
-    payload = {"api_dev_key": '7lc7IMiM_x5aMUFFudCiCo35t4o0Sxx6',
-               "api_paste_private": '1',
-               "api_option": 'paste',
-               "api_paste_name": filename,
-               "api_paste_expire_date": '10M',
-               "api_paste_code": file,
-               "api_paste_format": 'json'}
-    url = 'https://pastebin.com/api/api_post.php'
+    payload = {
+        "api_dev_key": "7lc7IMiM_x5aMUFFudCiCo35t4o0Sxx6",
+        "api_paste_private": "1",
+        "api_option": "paste",
+        "api_paste_name": filename,
+        "api_paste_expire_date": "10M",
+        "api_paste_code": file,
+        "api_paste_format": "json",
+    }
+    url = "https://pastebin.com/api/api_post.php"
     r = requests.post(url, data=payload)
     return r
 
 
 def convert_to_number(value):
-
     if isinstance(value, dict):
-        value = {k: float(v) if isinstance(v, str) and (v.isnumeric() or (
-            data_type_str == 'csv' and v != 'PM_Index')) else v for k, v in value.items()}
+        value = {
+            k: float(v)
+            if isinstance(v, str)
+            and (v.isnumeric() or (data_type_str == "csv" and v != "PM_Index"))
+            else v
+            for k, v in value.items()
+        }
     return value
 
 
 def update_max_term(variable_index, variable_name):
-    if 'quantiles_data' in st.session_state and variable_name in st.session_state['quantiles_data'] and 'number_of_quantiles' in st.session_state['quantiles_data'][variable_name]:
-        st.session_state['quantiles_data'][variable_name][
-            'number_of_quantiles'] = st.session_state[f"Quantile{variable_index}"]
-        st.session_state['quantiles_data'][variable_name].pop(
-            'col_terms', None)
-        st.session_state['quantiles_data'][variable_name].pop('q_data', None)
+    if (
+        "quantiles_data" in st.session_state
+        and variable_name in st.session_state["quantiles_data"]
+        and "number_of_quantiles" in st.session_state["quantiles_data"][variable_name]
+    ):
+        st.session_state["quantiles_data"][variable_name][
+            "number_of_quantiles"
+        ] = st.session_state[f"Quantile{variable_index}"]
+        st.session_state["quantiles_data"][variable_name].pop("col_terms", None)
+        st.session_state["quantiles_data"][variable_name].pop("q_data", None)
 
 
-def update_terms(selected_column, data_type='csv', variable_index=0):
-    if data_type == 'csv':
+def update_terms(selected_column, data_type="csv", variable_index=0):
+    if data_type == "csv":
         value = st.session_state["Column_Terms"]
-        if 'mfitted' in st.session_state:
-            if selected_column not in st.session_state['mfitted'][data_type]:
+        if "mfitted" in st.session_state:
+            if selected_column not in st.session_state["mfitted"][data_type]:
                 print("selected_column", selected_column)
                 # st.session_state['mfitted'][data_type][selected_column]['options']['terms'] = value
-            elif st.session_state['mfitted'][data_type][selected_column]['options']['terms'] != value:
-                st.session_state['mfitted'][data_type][selected_column]['options']['terms'] = value
+            elif (
+                st.session_state["mfitted"][data_type][selected_column]["options"][
+                    "terms"
+                ]
+                != value
+            ):
+                st.session_state["mfitted"][data_type][selected_column]["options"][
+                    "terms"
+                ] = value
     else:
-        if 'quantiles_data' in st.session_state and selected_column in st.session_state['quantiles_data'] and 'col_terms' in st.session_state['quantiles_data'][selected_column]:
-            st.session_state['quantiles_data'][selected_column]['col_terms'] = st.session_state[
-                f"Column_Terms {selected_column} {variable_index}"]
+        if (
+            "quantiles_data" in st.session_state
+            and selected_column in st.session_state["quantiles_data"]
+            and "col_terms" in st.session_state["quantiles_data"][selected_column]
+        ):
+            st.session_state["quantiles_data"][selected_column][
+                "col_terms"
+            ] = st.session_state[f"Column_Terms {selected_column} {variable_index}"]
 
 
 def update_values(variable_name, session_key, row):
-    if 'quantiles_data' in st.session_state and variable_name in st.session_state['quantiles_data'] and 'q_data' in st.session_state['quantiles_data'][variable_name]:
+    if (
+        "quantiles_data" in st.session_state
+        and variable_name in st.session_state["quantiles_data"]
+        and "q_data" in st.session_state["quantiles_data"][variable_name]
+    ):
         # st.session_state['quantiles_data'][quantile_name[quantile_index]]['q_data']
-        df = st.session_state['quantiles_data'][variable_name]['q_data'].reset_index(
-        )
-        col = 0 if session_key[0] == 'y' else 1
+        df = st.session_state["quantiles_data"][variable_name]["q_data"].reset_index()
+        col = 0 if session_key[0] == "y" else 1
         print("value in df is", df.iloc[row, col])
         df.iloc[row, col] = st.session_state[session_key]
         print("value in df is", df.iloc[row, col])
         print("df is", df.set_index(""))
-        st.session_state['quantiles_data'][variable_name]['q_data'] = df.set_index(
-            "")
-        if 'mfitted' in st.session_state and variable_name in st.session_state['mfitted'][data_type_str]:
-            st.session_state['mfitted'][data_type_str].pop(variable_name, None)
+        st.session_state["quantiles_data"][variable_name]["q_data"] = df.set_index("")
+        if (
+            "mfitted" in st.session_state
+            and variable_name in st.session_state["mfitted"][data_type_str]
+        ):
+            st.session_state["mfitted"][data_type_str].pop(variable_name, None)
 
 
 def update_correlations(session_key):
-    if 'quantiles_data' in st.session_state and 'correlations' in st.session_state['quantiles_data']:
+    if (
+        "quantiles_data" in st.session_state
+        and "correlations" in st.session_state["quantiles_data"]
+    ):
         # st.session_state['quantiles_data'][quantile_name[quantile_index]]['q_data']
-        df = st.session_state['quantiles_data']['correlations']
+        df = st.session_state["quantiles_data"]["correlations"]
         col, row = session_key.split(" vs ")
         print("col,row", col, row)
         print("value in df is", df.loc[row, col])
         df.loc[row, col] = st.session_state[session_key]
         print("value in df is", df.loc[row, col])
         print("df is", df)
-        st.session_state['quantiles_data']['correlations'] = df
+        st.session_state["quantiles_data"]["correlations"] = df
 
 
 def update_input_name():
     print("Big Graph Column is", st.session_state["Big Graph Column"])
-    st.session_state["quantile_counter"] = st.session_state['quantiles_data'][st.session_state["Big Graph Column"]]['pos']
+    st.session_state["quantile_counter"] = st.session_state["quantiles_data"][
+        st.session_state["Big Graph Column"]
+    ]["pos"]
 
 
 def update_variable_count():
     if "Number of Quantiles Variables" in st.session_state:
-        st.session_state['quantiles_variable_count'] = st.session_state["Number of Quantiles Variables"]
+        st.session_state["quantiles_variable_count"] = st.session_state[
+            "Number of Quantiles Variables"
+        ]
 
 
 def update_counter(value):
-    if data_type_str == 'quantile':
-        if 'quantile_counter' in st.session_state and 'Number of Quantiles Variables' in st.session_state:
-            if (value == -1 and st.session_state['quantile_counter'] == 1) or (value == 1 and st.session_state['quantile_counter'] == st.session_state['Number of Quantiles Variables']):
+    if data_type_str == "quantile":
+        if (
+            "quantile_counter" in st.session_state
+            and "Number of Quantiles Variables" in st.session_state
+        ):
+            if (value == -1 and st.session_state["quantile_counter"] == 1) or (
+                value == 1
+                and st.session_state["quantile_counter"]
+                == st.session_state["Number of Quantiles Variables"]
+            ):
                 return None
-            st.session_state['quantile_counter'] += value
+            st.session_state["quantile_counter"] += value
         else:
-            st.session_state['quantile_counter'] = 1
+            st.session_state["quantile_counter"] = 1
     else:
-        if 'csv_counter' in st.session_state and 'column_index' in st.session_state:
-            if (value == -1 and st.session_state['csv_counter'] == 1) or (value == 1 and st.session_state['csv_counter'] == len(st.session_state["column_index"])):
+        if "csv_counter" in st.session_state and "column_index" in st.session_state:
+            if (value == -1 and st.session_state["csv_counter"] == 1) or (
+                value == 1
+                and st.session_state["csv_counter"]
+                == len(st.session_state["column_index"])
+            ):
                 return None
-            st.session_state['csv_counter'] += value
-            print("keys", list(st.session_state["column_index"].keys())[
-                  st.session_state['csv_counter'] - 1])
-            st.session_state["Big Graph Column"] = list(st.session_state["column_index"].keys())[
-                st.session_state['csv_counter'] - 1]
+            st.session_state["csv_counter"] += value
+            print(
+                "keys",
+                list(st.session_state["column_index"].keys())[
+                    st.session_state["csv_counter"] - 1
+                ],
+            )
+            st.session_state["Big Graph Column"] = list(
+                st.session_state["column_index"].keys()
+            )[st.session_state["csv_counter"] - 1]
         else:
-            st.session_state['csv_counter'] = 1
+            st.session_state["csv_counter"] = 1
 
 
 def update_name(num):
     new_name = st.session_state[f"Quantile Name {num}"]
-    if not new_name in st.session_state['quantiles_data']:
-        for variable in st.session_state['quantiles_data']:
-            if st.session_state['quantiles_data'][variable]['pos'] == num:
-                st.session_state['quantiles_data'][new_name] = st.session_state['quantiles_data'].pop(
-                    variable)
-                if 'mfitted' in st.session_state and variable in st.session_state['mfitted'][data_type_str]:
-                    st.session_state['mfitted'][data_type_str][new_name] = st.session_state['mfitted'][data_type_str].pop(
-                        variable, None)
+    if not new_name in st.session_state["quantiles_data"]:
+        for variable in st.session_state["quantiles_data"]:
+            if st.session_state["quantiles_data"][variable]["pos"] == num:
+                st.session_state["quantiles_data"][new_name] = st.session_state[
+                    "quantiles_data"
+                ].pop(variable)
+                if (
+                    "mfitted" in st.session_state
+                    and variable in st.session_state["mfitted"][data_type_str]
+                ):
+                    st.session_state["mfitted"][data_type_str][
+                        new_name
+                    ] = st.session_state["mfitted"][data_type_str].pop(variable, None)
                 break
     pass
 
 
-def update_boundedness(refresh=False, data_type='csv', max=1, min=0, quantile_count=None, variable_name=None):
+def update_boundedness(
+    refresh=False,
+    data_type="csv",
+    max=1,
+    min=0,
+    quantile_count=None,
+    variable_name=None,
+):
     if quantile_count is None:
         boundedness = st.session_state["Column_boundedness"]
     else:
-        boundedness = st.session_state[f"Column_boundedness {variable_name} {quantile_count+1}"]
+        boundedness = st.session_state[
+            f"Column_boundedness {variable_name} {quantile_count+1}"
+        ]
 
-    selected_column = st.session_state["Big Graph Column"] if data_type == 'csv' else variable_name
+    selected_column = (
+        st.session_state["Big Graph Column"] if data_type == "csv" else variable_name
+    )
     print("boundedness from session is ", boundedness)
     print("selected_column from session is ", selected_column)
     if "Column_upper" not in st.session_state:
@@ -829,101 +975,192 @@ def update_boundedness(refresh=False, data_type='csv', max=1, min=0, quantile_co
         bounds = [0, 1]
     boundedness = boundedness.strip().split(" - ")[0].replace("'", "")
 
-    if 'quantiles_data' in st.session_state and selected_column in st.session_state['quantiles_data'] and 'boundedness' in st.session_state['quantiles_data'][selected_column]:
-        st.session_state['quantiles_data'][selected_column]['boundedness'] = boundedness
-        st.session_state['quantiles_data'][selected_column]['bounds'] = bounds
+    if (
+        "quantiles_data" in st.session_state
+        and selected_column in st.session_state["quantiles_data"]
+        and "boundedness" in st.session_state["quantiles_data"][selected_column]
+    ):
+        st.session_state["quantiles_data"][selected_column]["boundedness"] = boundedness
+        st.session_state["quantiles_data"][selected_column]["bounds"] = bounds
 
-    if 'mfitted' in st.session_state and selected_column in st.session_state['mfitted'][data_type]:
-        if selected_column not in st.session_state['mfitted'][data_type] or (st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] != boundedness or st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] != bounds):
+    if (
+        "mfitted" in st.session_state
+        and selected_column in st.session_state["mfitted"][data_type]
+    ):
+        if selected_column not in st.session_state["mfitted"][data_type] or (
+            st.session_state["mfitted"][data_type][selected_column]["options"][
+                "boundedness"
+            ]
+            != boundedness
+            or st.session_state["mfitted"][data_type][selected_column]["options"][
+                "bounds"
+            ]
+            != bounds
+        ):
             # print("selected_column",selected_column)
-            if any([x[0] != x[1] for x in zip(st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'], boundedness)]):
-                print("saved", st.session_state['mfitted'][data_type][selected_column]
-                      ['options']['boundedness'], "current boundedness", boundedness)
-                st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] = boundedness
+            if any(
+                [
+                    x[0] != x[1]
+                    for x in zip(
+                        st.session_state["mfitted"][data_type][selected_column][
+                            "options"
+                        ]["boundedness"],
+                        boundedness,
+                    )
+                ]
+            ):
+                print(
+                    "saved",
+                    st.session_state["mfitted"][data_type][selected_column]["options"][
+                        "boundedness"
+                    ],
+                    "current boundedness",
+                    boundedness,
+                )
+                st.session_state["mfitted"][data_type][selected_column]["options"][
+                    "boundedness"
+                ] = boundedness
                 refresh = True
-            if any([float(x[0]) != float(x[1]) for x in zip(st.session_state['mfitted'][data_type][selected_column]['options']['bounds'], bounds)]):
-                print("saved", st.session_state['mfitted'][data_type]
-                      [selected_column]['options']['bounds'], "current bounds", bounds)
-                st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] = bounds
-                print("saved after saving", st.session_state['mfitted'][data_type]
-                      [selected_column]['options']['bounds'], "current bounds", bounds)
+            if any(
+                [
+                    float(x[0]) != float(x[1])
+                    for x in zip(
+                        st.session_state["mfitted"][data_type][selected_column][
+                            "options"
+                        ]["bounds"],
+                        bounds,
+                    )
+                ]
+            ):
+                print(
+                    "saved",
+                    st.session_state["mfitted"][data_type][selected_column]["options"][
+                        "bounds"
+                    ],
+                    "current bounds",
+                    bounds,
+                )
+                st.session_state["mfitted"][data_type][selected_column]["options"][
+                    "bounds"
+                ] = bounds
+                print(
+                    "saved after saving",
+                    st.session_state["mfitted"][data_type][selected_column]["options"][
+                        "bounds"
+                    ],
+                    "current bounds",
+                    bounds,
+                )
                 refresh = True
         # elif :
-            # st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] = boundedness
-            # st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] = boundedness
-            # st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] = bounds
-            # st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] = bounds
-            # TODO: recalculate when bounds change
-    if refresh and 'mfitted' in st.session_state and selected_column in st.session_state['mfitted'][data_type]:
-        st.session_state['mfitted'][data_type][selected_column]['fit'] = None
+        # st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] = boundedness
+        # st.session_state['mfitted'][data_type][selected_column]['options']['boundedness'] = boundedness
+        # st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] = bounds
+        # st.session_state['mfitted'][data_type][selected_column]['options']['bounds'] = bounds
+        # TODO: recalculate when bounds change
+    if (
+        refresh
+        and "mfitted" in st.session_state
+        and selected_column in st.session_state["mfitted"][data_type]
+    ):
+        st.session_state["mfitted"][data_type][selected_column]["fit"] = None
         # st.session_state['mfitted']['quantile'][selected_column]['fit'] = None
-        st.session_state['mfitted'][data_type][selected_column]['plot'] = {
-            data_type: None, 'big plot': None}
+        st.session_state["mfitted"][data_type][selected_column]["plot"] = {
+            data_type: None,
+            "big plot": None,
+        }
         # st.session_state['mfitted']['quantile'][selected_column]['plot'] = {data_type:None,'big plot':None}
 
 
-def update_seeds(data_type='csv',  entity=None,  varId=None,  seed3=None,  seed4=None, variable_name=None):
-    selected_column = st.session_state["Big Graph Column"] if data_type == 'csv' else variable_name
+def update_seeds(
+    data_type="csv", entity=None, varId=None, seed3=None, seed4=None, variable_name=None
+):
+    selected_column = (
+        st.session_state["Big Graph Column"] if data_type == "csv" else variable_name
+    )
 
-    if data_type != 'csv' and 'quantiles_data' in st.session_state and selected_column in st.session_state['quantiles_data'] and 'seeds' in st.session_state['quantiles_data'][selected_column]:
-        for item in ['entity', 'seed3', 'seed4']:
+    if (
+        data_type != "csv"
+        and "quantiles_data" in st.session_state
+        and selected_column in st.session_state["quantiles_data"]
+        and "seeds" in st.session_state["quantiles_data"][selected_column]
+    ):
+        for item in ["entity", "seed3", "seed4"]:
             if st.session_state[f"{item} {selected_column}"].isnumeric():
-                st.session_state['quantiles_data'][selected_column]['seeds'][
-                    'arguments'][item] = st.session_state[f"{item} {selected_column}"]
+                st.session_state["quantiles_data"][selected_column]["seeds"][
+                    "arguments"
+                ][item] = st.session_state[f"{item} {selected_column}"]
             else:
-                st.warning(f'{item} must be a number.')
+                st.warning(f"{item} must be a number.")
                 # st.stop()
         if st.session_state[f"varId {selected_column}"].strip():
-            st.session_state['quantiles_data'][selected_column]['seeds'][
-                'arguments']['varId'] = st.session_state[f"varId {selected_column}"]
+            st.session_state["quantiles_data"][selected_column]["seeds"]["arguments"][
+                "varId"
+            ] = st.session_state[f"varId {selected_column}"]
         else:
-            st.warning(f'varId must have a value.')
+            st.warning(f"varId must have a value.")
             # st.stop()
 
-        st.session_state['quantiles_data'][selected_column]['seeds']['arguments'] = {'counter': 'PM_Index',
-                                                                                     'entity': st.session_state[f"entity {selected_column}"],
-                                                                                     'varId': st.session_state[f"varId {selected_column}"],
-                                                                                     'seed3': st.session_state[f"seed3 {selected_column}"],
-                                                                                     'seed4': st.session_state[f"seed4 {selected_column}"]}
+        st.session_state["quantiles_data"][selected_column]["seeds"]["arguments"] = {
+            "counter": "PM_Index",
+            "entity": st.session_state[f"entity {selected_column}"],
+            "varId": st.session_state[f"varId {selected_column}"],
+            "seed3": st.session_state[f"seed3 {selected_column}"],
+            "seed4": st.session_state[f"seed4 {selected_column}"],
+        }
 
-    if 'mfitted' in st.session_state and selected_column in st.session_state['mfitted'][data_type] and 'seeds' in st.session_state['mfitted'][data_type][selected_column]['options']:
+    if (
+        "mfitted" in st.session_state
+        and selected_column in st.session_state["mfitted"][data_type]
+        and "seeds"
+        in st.session_state["mfitted"][data_type][selected_column]["options"]
+    ):
         if not entity is None:
-            st.session_state['mfitted'][data_type][selected_column]['options']['seeds']['arguments']['entity'] = entity
+            st.session_state["mfitted"][data_type][selected_column]["options"]["seeds"][
+                "arguments"
+            ]["entity"] = entity
         elif not varId is None:
-            st.session_state['mfitted'][data_type][selected_column]['options']['seeds']['arguments']['varId'] = varId
+            st.session_state["mfitted"][data_type][selected_column]["options"]["seeds"][
+                "arguments"
+            ]["varId"] = varId
         elif not seed3 is None:
-            st.session_state['mfitted'][data_type][selected_column]['options']['seeds']['arguments']['seed3'] = seed3
+            st.session_state["mfitted"][data_type][selected_column]["options"]["seeds"][
+                "arguments"
+            ]["seed3"] = seed3
         elif not seed4 is None:
-            st.session_state['mfitted'][data_type][selected_column]['options']['seeds']['arguments']['seed4'] = seed4
-        elif selected_column in st.session_state['mfitted'][data_type]:
-            st.session_state['mfitted'][data_type][selected_column]['options']['seeds']['arguments'] = {'counter': 'PM_Index',
-                                                                                                        'entity': st.session_state[f"entity {selected_column}"],
-                                                                                                        'varId': st.session_state[f"varId {selected_column}"],
-                                                                                                        'seed3': st.session_state[f"seed3 {selected_column}"],
-                                                                                                        'seed4': st.session_state[f"seed4 {selected_column}"]}
+            st.session_state["mfitted"][data_type][selected_column]["options"]["seeds"][
+                "arguments"
+            ]["seed4"] = seed4
+        elif selected_column in st.session_state["mfitted"][data_type]:
+            st.session_state["mfitted"][data_type][selected_column]["options"]["seeds"][
+                "arguments"
+            ] = {
+                "counter": "PM_Index",
+                "entity": st.session_state[f"entity {selected_column}"],
+                "varId": st.session_state[f"varId {selected_column}"],
+                "seed3": st.session_state[f"seed3 {selected_column}"],
+                "seed4": st.session_state[f"seed4 {selected_column}"],
+            }
 
 
-def make_csv_graph(series,
-                   probs,
-                   boundedness,
-                   bounds,
-                   big_plots,
-                   user_terms,
-                   graphs):
+def make_csv_graph(series, probs, boundedness, bounds, big_plots, user_terms, graphs):
     if big_plots:
         graphs_container.markdown(
-            f"<div id='linkto_head'></div>", unsafe_allow_html=True)
+            f"<div id='linkto_head'></div>", unsafe_allow_html=True
+        )
         # graphs_container.header(series.name)
         print(probs)
-    preprocess_charts(series.to_list(),
-                      probs,
-                      boundedness,
-                      bounds,
-                      big_plots,
-                      16 if probs is np.nan else user_terms,
-                      graphs,
-                      series.name,
-                      user_terms)
+    preprocess_charts(
+        series.to_list(),
+        probs,
+        boundedness,
+        bounds,
+        big_plots,
+        16 if probs is np.nan else user_terms,
+        graphs,
+        series.name,
+        user_terms,
+    )
     # if probs is np.nan:
     # preprocess_charts(series.to_list(),
     # probs,
@@ -946,6 +1183,8 @@ def make_csv_graph(series,
     # user_terms)
 
     return None
+
+
 # @st.cache
 
 
@@ -954,170 +1193,255 @@ def input_data(name, i, df, probs=None):
         probs = np.nan
         max_val = 16
         default_val = 5
-        input_data_type = 'csv'
+        input_data_type = "csv"
         data_columns = df.columns
         table_container.write(
-            "If the data above appears correct, enter your parameters in the sidebar for this file.")
+            "If the data above appears correct, enter your parameters in the sidebar for this file."
+        )
     else:
         max_val = df.shape[0]
         default_val = max_val
-        input_data_type = 'quantile'
+        input_data_type = "quantile"
         data_columns = df.columns
 
     with st.sidebar.expander("Output Options"):
         filename_container = st.container()
         file_name_no_ext, file_ext = filename_container.columns(2)
-        filename = file_name_no_ext.text_input(
-            f'Filename {i+1}', name, key=f"{name}_{i}_filename") + '.SIPmath'
-        file_ext.write('File Extension')
-        file_ext.write('.SIPmath')
+        filename = (
+            file_name_no_ext.text_input(
+                f"Filename {i+1}", name, key=f"{name}_{i}_filename"
+            )
+            + ".SIPmath"
+        )
+        file_ext.write("File Extension")
+        file_ext.write(".SIPmath")
         author = st.text_input(
-            f'Author for {filename}', 'Unknown', key=f"{name}_author")
+            f"Author for {filename}", "Unknown", key=f"{name}_author"
+        )
         # if data_type_str != "quantile":
-        dependent_name = 'Guassian Copula' if data_type_str == "csv" else "Correlation Matrix"
+        dependent_name = (
+            "Guassian Copula" if data_type_str == "csv" else "Correlation Matrix"
+        )
         dependence = st.selectbox(
-            'Dependence', ('independent', dependent_name), key=f"{name}_{i}_dependence")
+            "Dependence", ("independent", dependent_name), key=f"{name}_{i}_dependence"
+        )
         correlation_df = None
         if dependence == "Correlation Matrix":
             number_variables = len(data_columns)
             print(number_variables)
             correlation_container = slider_container.columns(number_variables)
-            if 'quantiles_data' in st.session_state and 'correlations' in st.session_state['quantiles_data']:
-                saved_df = st.session_state['quantiles_data']['correlations']
+            if (
+                "quantiles_data" in st.session_state
+                and "correlations" in st.session_state["quantiles_data"]
+            ):
+                saved_df = st.session_state["quantiles_data"]["correlations"]
                 for row in df.columns:
                     for col in df.columns:
                         print("value in saved_df is", saved_df.loc[row, col])
                         st.session_state[f"{row} vs {col}"] = saved_df.loc[col, row]
-            corrs_data = [[float(correlation_container[i-1].number_input(f'{df.columns[j]} vs {df.columns[i-1]} ',
-                                                                         value=1.0 if j+1 == i else 0.0,
-                                                                         format="%f",
-                                                                         # step = 0.1
-                                                                         on_change=update_correlations,
-                                                                         args=(
-                                                                             f"{df.columns[j]} vs {df.columns[i-1]}",),
-                                                                         key=f"{df.columns[j]} vs {df.columns[i-1]}")) for j in range(i)] for i in range(1, number_variables+1)]
+            corrs_data = [
+                [
+                    float(
+                        correlation_container[i - 1].number_input(
+                            f"{df.columns[j]} vs {df.columns[i-1]} ",
+                            value=1.0 if j + 1 == i else 0.0,
+                            format="%f",
+                            # step = 0.1
+                            on_change=update_correlations,
+                            args=(f"{df.columns[j]} vs {df.columns[i-1]}",),
+                            key=f"{df.columns[j]} vs {df.columns[i-1]}",
+                        )
+                    )
+                    for j in range(i)
+                ]
+                for i in range(1, number_variables + 1)
+            ]
             print("corrs_data", corrs_data)
             correlation_df = pd.DataFrame(
-                corrs_data, columns=df.columns, index=df.columns)
-            st.session_state['quantiles_data']['correlations'] = correlation_df
+                corrs_data, columns=df.columns, index=df.columns
+            )
+            st.session_state["quantiles_data"]["correlations"] = correlation_df
             check_correlation_df = correlation_df.fillna(correlation_df.T)
             print("check_correlation_df", check_correlation_df)
             correlation_check_run = True
-            if correlation_container[number_variables-1].button('Store Correlation', key='correlation_done'):
-                print('ran correlation check')
+            if correlation_container[number_variables - 1].button(
+                "Store Correlation", key="correlation_done"
+            ):
+                print("ran correlation check")
                 print(np.linalg.eigvals(check_correlation_df.to_numpy()))
                 correlation_check_run = np.all(
-                    np.linalg.eigvals(check_correlation_df.to_numpy()) > 0)
+                    np.linalg.eigvals(check_correlation_df.to_numpy()) > 0
+                )
                 if not correlation_check_run:
                     correlation_container[0].warning(
-                        "The correlation matrix needs to be feasible.")
+                        "The correlation matrix needs to be feasible."
+                    )
                     # st.stop()
 
             print(correlation_df)
             # pass
-        if dependence != 'independent':
-            dependence = 'dependent'
+        if dependence != "independent":
+            dependence = "dependent"
         # else:
-            # dependence = 'independent'
+        # dependence = 'independent'
         # boundedness = st.selectbox('Boundedness', ("'u' - unbounded",
-            # "'sl' - semi-bounded lower",
-            # "'su' - semi-bounded upper",
-            # "'b' - bounded on both sides"),key=f"{name}_boundedness")
+        # "'sl' - semi-bounded lower",
+        # "'su' - semi-bounded upper",
+        # "'b' - bounded on both sides"),key=f"{name}_boundedness")
 
         # if boundedness == "'b' - bounded on both sides":
-            # #convert to float and list
-            # boundsl = st.text_input('Lower Bound', '0',key=f"{name}_lower")
-            # boundsu = st.text_input('Upper Bound', '1',key=f"{name}_upper")
-            # bounds = [float(boundsl),float(boundsu)]
+        # #convert to float and list
+        # boundsl = st.text_input('Lower Bound', '0',key=f"{name}_lower")
+        # boundsu = st.text_input('Upper Bound', '1',key=f"{name}_upper")
+        # bounds = [float(boundsl),float(boundsu)]
         # elif boundedness.find("lower") != -1:
-            # bounds = [float(st.text_input('Lower Bound', '0',key=f"{name}_lower"))]
+        # bounds = [float(st.text_input('Lower Bound', '0',key=f"{name}_lower"))]
         # elif boundedness.find("upper") != -1:
-            # bounds = [float(st.text_input('Upper Bound', '1',key=f"{name}_upper"))]
+        # bounds = [float(st.text_input('Upper Bound', '1',key=f"{name}_upper"))]
         # else:
-            # bounds = [0,1]
+        # bounds = [0,1]
 
         # boundedness = boundedness.strip().split(" - ")[0].replace("'","")
         # if max_val > 3:
-            # term_saved = st.slider('Term Saved',3,max_val,default_val,key=f"{name}_term_saved")
+        # term_saved = st.slider('Term Saved',3,max_val,default_val,key=f"{name}_term_saved")
         # else:
-            # term_saved = 3
-        if 'mfitted' in st.session_state:
-            fit_data = [not st.session_state['mfitted'][input_data_type][x]['fit'] is None
-                        for x in data_columns
-                        if x in st.session_state['mfitted'][input_data_type]]
+        # term_saved = 3
+        if "mfitted" in st.session_state:
+            fit_data = [
+                not st.session_state["mfitted"][input_data_type][x]["fit"] is None
+                for x in data_columns
+                if x in st.session_state["mfitted"][input_data_type]
+            ]
             # for x in data_columns:
             # if x in st.session_state['mfitted'][input_data_type]:
             # st.session_state['mfitted'][input_data_type][x]['options']['seeds'] = st.session_state['quantiles_data'][x]['seeds']
 
-            seeds_data = ['seeds' in st.session_state['mfitted'][input_data_type][x]['options']
-                          for x in data_columns
-                          if x in st.session_state['mfitted'][input_data_type]]
+            seeds_data = [
+                "seeds" in st.session_state["mfitted"][input_data_type][x]["options"]
+                for x in data_columns
+                if x in st.session_state["mfitted"][input_data_type]
+            ]
         # print("fit_data",fit_data)
         # print("seeds_data",seeds_data)
-         # ###### I need to fix the problem by adjusting csv to variable then select it based on if probs is None or not.
-        if 'mfitted' in st.session_state and all(fit_data) and all(seeds_data):
-            term_saved = [st.session_state['mfitted'][input_data_type][x]['options']['terms']
-                          if x in st.session_state['mfitted'][input_data_type] else None for x in data_columns]
+        # ###### I need to fix the problem by adjusting csv to variable then select it based on if probs is None or not.
+        if "mfitted" in st.session_state and all(fit_data) and all(seeds_data):
+            term_saved = [
+                st.session_state["mfitted"][input_data_type][x]["options"]["terms"]
+                if x in st.session_state["mfitted"][input_data_type]
+                else None
+                for x in data_columns
+            ]
             print("term_saved is ", type(term_saved[0]))
-            if all(term_saved) and "--------Enter number of terms--------" not in term_saved:
-                print(f'Writing SIPmath with data_columns as {data_columns}')
-                boundedness = [st.session_state['mfitted'][input_data_type][x]['options']['boundedness']
-                               if x in st.session_state['mfitted'][input_data_type] else None for x in data_columns]
-                bounds = [[y for y in st.session_state['mfitted'][input_data_type][x]['options']['bounds']]
-                          if x in st.session_state['mfitted'][input_data_type] else None for x in data_columns]
+            if (
+                all(term_saved)
+                and "--------Enter number of terms--------" not in term_saved
+            ):
+                print(f"Writing SIPmath with data_columns as {data_columns}")
+                boundedness = [
+                    st.session_state["mfitted"][input_data_type][x]["options"][
+                        "boundedness"
+                    ]
+                    if x in st.session_state["mfitted"][input_data_type]
+                    else None
+                    for x in data_columns
+                ]
+                bounds = [
+                    [
+                        y
+                        for y in st.session_state["mfitted"][input_data_type][x][
+                            "options"
+                        ]["bounds"]
+                    ]
+                    if x in st.session_state["mfitted"][input_data_type]
+                    else None
+                    for x in data_columns
+                ]
                 print(bounds)
                 preview_options = pd.DataFrame(
-                    term_saved, index=data_columns, columns=['Term'])
-                preview_options['Boundedness'] = boundedness
-                preview_options['Lower Bounds'] = [float(
-                    x[0]) if y == 'b' or y == 'sl' else np.nan for x, y in zip(bounds, boundedness)]
-                preview_options['Upper Bounds'] = [float(
-                    x[-1]) if y == 'b' or y == 'su' else np.nan for x, y in zip(bounds, boundedness)]
-                print(preview_options['Term'])
-                for coeff_num in range(int(preview_options['Term'].max())):
+                    term_saved, index=data_columns, columns=["Term"]
+                )
+                preview_options["Boundedness"] = boundedness
+                preview_options["Lower Bounds"] = [
+                    float(x[0]) if y == "b" or y == "sl" else np.nan
+                    for x, y in zip(bounds, boundedness)
+                ]
+                preview_options["Upper Bounds"] = [
+                    float(x[-1]) if y == "b" or y == "su" else np.nan
+                    for x, y in zip(bounds, boundedness)
+                ]
+                print(preview_options["Term"])
+                for coeff_num in range(int(preview_options["Term"].max())):
                     # preview_options[f'A {coeff_num + 1}'] = [st.session_state['mfitted'][input_data_type][x]['fit']['A'].iloc[coeff_num,st.session_state['mfitted'][input_data_type][x]['options']['terms'] - 1] for x in data_columns]
-                    preview_options[f'A {coeff_num + 1}'] = [st.session_state['mfitted'][input_data_type][x]['fit']['A'].iloc[coeff_num, st.session_state['mfitted'][input_data_type][x]['options']['terms'] - 1]
-                                                             if st.session_state['mfitted'][input_data_type][x]['fit']['A'].shape[0] > coeff_num else None for x in data_columns]
+                    preview_options[f"A {coeff_num + 1}"] = [
+                        st.session_state["mfitted"][input_data_type][x]["fit"][
+                            "A"
+                        ].iloc[
+                            coeff_num,
+                            st.session_state["mfitted"][input_data_type][x]["options"][
+                                "terms"
+                            ]
+                            - 1,
+                        ]
+                        if st.session_state["mfitted"][input_data_type][x]["fit"][
+                            "A"
+                        ].shape[0]
+                        > coeff_num
+                        else None
+                        for x in data_columns
+                    ]
                 # preview_options = preview_options.T
                 table_container.write(preview_options)
-                converted_seeds = [{k: convert_to_number(
-                    v) for k, v in st.session_state['mfitted'][input_data_type][x]['options']['seeds'].items()} for x in data_columns]
+                converted_seeds = [
+                    {
+                        k: convert_to_number(v)
+                        for k, v in st.session_state["mfitted"][input_data_type][x][
+                            "options"
+                        ]["seeds"].items()
+                    }
+                    for x in data_columns
+                ]
                 print("converted_seeds is", converted_seeds)
-                if st.button(f'Convert to {filename.split(".")[0]} SIPmath Json?', key=f"{filename.split('.')[0]}_term_saved"):
+                if st.button(
+                    f'Convert to {filename.split(".")[0]} SIPmath Json?',
+                    key=f"{filename.split('.')[0]}_term_saved",
+                ):
                     table_container.subheader(
-                        "Preview and Download the JSON file below.")
-                    data_dict_for_JSON = dict(boundedness=boundedness,
-                                              bounds=bounds,
-                                              term_saved=term_saved)
+                        "Preview and Download the JSON file below."
+                    )
+                    data_dict_for_JSON = dict(
+                        boundedness=boundedness, bounds=bounds, term_saved=term_saved
+                    )
                     print("probs in JSON", probs)
-                    PySIP.Json(SIPdata=df,
-                               file_name=filename,
-                               author=author,
-                               dependence=dependence,
-                               setupInputs=data_dict_for_JSON,
-                               seeds=converted_seeds,
-                               probs=probs,
-                               quantile_corr_matrix=correlation_df)
+                    PySIP.Json(
+                        SIPdata=df,
+                        file_name=filename,
+                        author=author,
+                        dependence=dependence,
+                        setupInputs=data_dict_for_JSON,
+                        seeds=converted_seeds,
+                        probs=probs,
+                        quantile_corr_matrix=correlation_df,
+                    )
 
                     with open(filename) as f:
                         st.download_button(
-                            label=f"Download {filename}",
-                            data=f,
-                            file_name=filename
+                            label=f"Download {filename}", data=f, file_name=filename
                         )
-                # st.text("Copy the link below to paste into SIPmath.")
-                # with open(filename, 'rb') as f:
+                    # st.text("Copy the link below to paste into SIPmath.")
+                    # with open(filename, 'rb') as f:
                     # st.write(sent_to_pastebin(filename,f.read()).text.replace("https://pastebin.com/","https://pastebin.com/raw/"))
                     table_container.text(
-                        "Mouse over the text then click on the clipboard icon to copy to your clipboard.")
-                    with open(filename, 'rb') as f:
+                        "Mouse over the text then click on the clipboard icon to copy to your clipboard."
+                    )
+                    with open(filename, "rb") as f:
                         table_container.json(json.load(f))
         else:
             st.warning(
-                f'{filename}.SIPmath cannot be saved until all variables have been configured.')
+                f"{filename}.SIPmath cannot be saved until all variables have been configured."
+            )
 
 
-#st.title('SIPmath JSON Creator')
+# st.title('SIPmath JSON Creator')
 # st.sidebar.header('User Input Parameters')
 # st.sidebar.header('User Input Parameters')
 # Collects user input features into dataframe
@@ -1732,62 +2056,78 @@ def input_data(name, i, df, probs=None):
 #         # pass
 #     input_data("Unknown", 0, pd_data, pd_data.index.to_list())
 # elif data_type == 'API':
-col_name = 'wind_speed'
+col_name = "wind_speed"
 micro_data = get_micropredictions()
-micro_data_df = pd.DataFrame([ p for p in micro_data], columns=[col_name])
+micro_data_df = pd.DataFrame([p for p in micro_data], columns=[col_name])
 name = micro_data_df.columns[0]
 # table_container.subheader(f"Preview for {name}")
 # table_container.write(micro_data_df[:10].to_html(
 #     index=False), unsafe_allow_html=True)
-probs=np.nan
-boundedness='u'
-bounds=[0, 1]
-big_plots=True
-user_terms=5
-graphs=False
-dependence = 'independent'
-file_name = f'{name}.SIPmath'
-micro_data_df.apply(make_csv_graph,
-                probs=probs,
-                boundedness=boundedness,
-                bounds=bounds,
-                big_plots=big_plots,
-                user_terms=user_terms,
-                graphs=graphs)
-text_container.markdown('''
-    <p class="big-font"></p>''', unsafe_allow_html=True)
-text_container.markdown('''
-    <p class="big-font"></p>''', unsafe_allow_html=True)
-text_container.markdown('''
+probs = np.nan
+boundedness = "u"
+bounds = [0, 1]
+big_plots = True
+user_terms = 3
+graphs = False
+dependence = "independent"
+file_name = f"{name}.SIPmath"
+micro_data_df.apply(
+    make_csv_graph,
+    probs=probs,
+    boundedness=boundedness,
+    bounds=bounds,
+    big_plots=big_plots,
+    user_terms=user_terms,
+    graphs=graphs,
+)
+text_container.markdown(
+    """
+    <p class="big-font"></p>""",
+    unsafe_allow_html=True,
+)
+text_container.markdown(
+    """
+    <p class="big-font"></p>""",
+    unsafe_allow_html=True,
+)
+text_container.markdown(
+    """
 <p class="big-font">Microprediction’s algorithms deliver forecasts as stochastic (SIP) libraries in the open <a href="https://www.probabilitymanagement.org/30-standard">SIPmath™ 3.0 Standard</a>, so they may be used in Monte Carlo or other calculations in R, Python or Excel using <a href="https://www.probabilitymanagement.org/chancecalc">ChanceCalc™</a>.</p>
-''', unsafe_allow_html=True)
-text_container.markdown('''
+""",
+    unsafe_allow_html=True,
+)
+text_container.markdown(
+    """
 <p class="big-font">For background on stochastic information packets (SIPs) see the <a href="https://en.wikipedia.org/wiki/Probability_management">Wikipedia entry on probability management</a>. The <a href="https://micropredictions.com">microprediction site</a> can be viewed as a source of real-time SIPs.</p>
-''', unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-convert_to_JSON(micro_data_df,
-                file_name,
-                name,
-                dependence,
-                boundedness,
-                bounds,
-                user_terms,
-                probs)
-     
+convert_to_JSON(
+    micro_data_df, file_name, name, dependence, boundedness, bounds, user_terms, probs
+)
+
 copy_button = Button(label=f"Copy {file_name} to clipboard.")
-with open(file_name, 'rb') as f:
-    copy_button.js_on_event("button_click", CustomJS(args=dict(data=str(json.load(f))), code="""
+with open(file_name, "rb") as f:
+    copy_button.js_on_event(
+        "button_click",
+        CustomJS(
+            args=dict(data=str(json.load(f))),
+            code="""
         navigator.clipboard.writeText(data);
-        """))
+        """,
+        ),
+    )
 
-no_event = streamlit_bokeh_events( 
+no_event = streamlit_bokeh_events(
     copy_button,
     events="GET_TEXT",
     key="get_text",
     refresh_on_update=True,
     override_height=75,
-    debounce_time=0)
+    debounce_time=0,
+)
 # if text_container.button(f'Display {file_name}'):
 #     text_container.text("Mouse over the text then click on the clipboard icon to copy to your clipboard.")
-#     
+#
 #         text_container.json(json.load(f))
